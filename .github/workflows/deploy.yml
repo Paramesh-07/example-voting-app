@@ -1,0 +1,34 @@
+name: application-deploy
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: git clone
+        uses: actions/checkout@v5.0.0
+      - name: build the image
+        run: docker build -t ${{vars.USER}}/voting .
+      - name: docker login
+        uses: docker/login-action@v3.6.0
+        with:
+          username: ${{vars.USER}}
+          password: ${{secrets.PASSKEY}}
+      - name: push the image
+        run: docker push ${{vars.USER}}/voting
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: pull the image
+        run: docker pull ${{vars.USER}}/voting
+      - name: run the container
+        run: docker run -dt --name voting -p 80:80 ${{vars.USER}}/voting
+      - name: list the container
+        run: docker ls -a
+    
+    
+
+
+
+
+
+        
